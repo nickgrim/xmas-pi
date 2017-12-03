@@ -22,10 +22,11 @@ func main() {
 		done bool
 		data uint32
 	)
-	// Set up GPIO, and set all of our pins to low
+	// Set up GPIO, and set all of our pins to be an output
 	if err := rpio.Open(); err != nil {
 		log.Fatalln(err)
 	}
+	star.Output()
 	for _, p := range leds {
 		p.Output()
 	}
