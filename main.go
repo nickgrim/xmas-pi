@@ -31,13 +31,13 @@ func main() {
 	}
 	defer rpio.Close()
 	defer turnOffLEDs()
-	// Trap SIGINT and SIGTERM, and set done
+	// Trap SIGHUP, SIGINT, SIGTERM, and set done
 	sigs := make(chan os.Signal, 1)
 	go func() {
 		_ = <-sigs
 		done = true
 	}()
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	// Turn on the star, and blink random LEDs until we're done
 	star.High()
 	for !done {
