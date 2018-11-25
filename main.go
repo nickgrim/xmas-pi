@@ -19,14 +19,14 @@ var leds = []rpio.Pin{4, 15, 13, 21, 25, 8, 5, 10, 16, 17, 27, 26, 24, 9, 12, 6,
 
 func main() {
 	var (
-		done bool
+		quitChan = make(chan struct{})
 	)
 
-	// Trap SIGHUP, SIGINT, SIGTERM, and set done
+	// Trap SIGHUP, SIGINT, SIGTERM, and close quitChan
 	sigs := make(chan os.Signal, 1)
 	go func() {
 		_ = <-sigs
-		done = true
+		close(quitChan)
 	}()
 	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 
@@ -44,9 +44,14 @@ func main() {
 
 	// Turn on the star, and blink random LEDs until we're done
 	star.High()
-	for !done {
-		randomlySetLEDs()
-		time.Sleep(delay)
+	for {
+		select {
+		case <-quitChan:
+			return
+		default:
+			randomlySetLEDs()
+			time.Sleep(delay)
+		}
 	}
 }
 
