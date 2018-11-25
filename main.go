@@ -21,16 +21,7 @@ func main() {
 	var (
 		done bool
 	)
-	// Set up GPIO, and set all of our pins to be an output
-	if err := rpio.Open(); err != nil {
-		log.Fatalln(err)
-	}
-	star.Output()
-	for _, p := range leds {
-		p.Output()
-	}
-	defer rpio.Close()
-	defer turnOffLEDs()
+
 	// Trap SIGHUP, SIGINT, SIGTERM, and set done
 	sigs := make(chan os.Signal, 1)
 	go func() {
@@ -38,6 +29,19 @@ func main() {
 		done = true
 	}()
 	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+
+	// Initialise GPIO
+	if err := rpio.Open(); err != nil {
+		log.Fatalln(err)
+	}
+	defer rpio.Close()
+	// Set all of our pins to be an output
+	star.Output()
+	for _, p := range leds {
+		p.Output()
+	}
+	defer turnOffLEDs()
+
 	// Turn on the star, and blink random LEDs until we're done
 	star.High()
 	for !done {
