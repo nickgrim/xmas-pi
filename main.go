@@ -20,7 +20,6 @@ var leds = []rpio.Pin{4, 15, 13, 21, 25, 8, 5, 10, 16, 17, 27, 26, 24, 9, 12, 6,
 func main() {
 	var (
 		done bool
-		data uint32
 	)
 	// Set up GPIO, and set all of our pins to be an output
 	if err := rpio.Open(); err != nil {
@@ -42,14 +41,19 @@ func main() {
 	// Turn on the star, and blink random LEDs until we're done
 	star.High()
 	for !done {
-		data = rand.Uint32()
-		for _, p := range leds {
-			if data&1 == 1 {
-				p.Toggle()
-			}
-			data = data >> 1
-		}
+		randomlySetLEDs()
 		time.Sleep(delay)
+	}
+}
+
+// randomlySetLEDs iterates through the LEDs, setting each to a random high/low state.
+func randomlySetLEDs() {
+	rnd := rand.Uint32()
+	for _, p := range leds {
+		if rnd&1 == 1 {
+			p.Toggle()
+		}
+		rnd = rnd >> 1
 	}
 }
 
